@@ -668,6 +668,12 @@ $(document).ready(function () {
     ui.toolbar.night.addClass('active')
   }
 
+  // Initialize author colors state
+  if (store.get('authorColorsVisible') === false) {
+    $body.addClass('hide-author-colors')
+    ui.toolbar.authorColors.removeClass('active')
+  }
+
   // showup
   $().showUp('.navbar', {
     upClass: 'navbar-hide',
@@ -2054,6 +2060,10 @@ ui.toolbar.both.click(function () {
 ui.toolbar.night.click(function () {
   toggleNightMode()
 })
+
+ui.toolbar.authorColors.click(function () {
+  toggleAuthorColors()
+})
 // permission
 // freely
 ui.infobar.permission.freely.click(function () {
@@ -2093,6 +2103,14 @@ function toggleNightMode () {
   $body.toggleClass('night', !isActive)
   ui.toolbar.night.toggleClass('active', !isActive)
   store.set('nightMode', !isActive)
+}
+
+function toggleAuthorColors () {
+  const $body = $('body')
+  const isActive = store.get('authorColorsVisible') !== false
+  $body.toggleClass('hide-author-colors', isActive)
+  ui.toolbar.authorColors.toggleClass('active', !isActive)
+  store.set('authorColorsVisible', !isActive)
 }
 
 function emitPermission (_permission) {

@@ -77,6 +77,13 @@ body:not(.night) .night {
 .CodeMirror-gutter.authorship-gutters {
     width: 8px;
 }
+body.hide-author-colors .authorship-inline {
+    background-color: transparent !important;
+    background-image: none !important;
+}
+body.hide-author-colors .authorship-gutter {
+    border-left-color: transparent !important;
+}
 .CodeMirror-matchingtag {
     background: rgba(255, 255, 255, .1);
     line-height: 1em;
