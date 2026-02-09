@@ -2494,8 +2494,8 @@ function updateAuthorshipInner () {
     const textMarker = addTextMarkers[i]
     const author = authors[textMarker.userid]
     const rgbcolor = hex2rgb(author.color)
-    const colorString = `rgba(${rgbcolor.red},${rgbcolor.green},${rgbcolor.blue},0.7)`
-    const styleString = `background-image: linear-gradient(to top, ${colorString} 1px, transparent 1px);`
+    const colorString = `rgba(${rgbcolor.red},${rgbcolor.green},${rgbcolor.blue},0.35)`
+    const styleString = `background-color: ${colorString}; background-image: none;`
     const className = `authorship-inline-${author.color.substr(1)}`
     const rule = `.${className} { ${styleString} }`
     addStyleRule(rule)
@@ -2912,14 +2912,19 @@ function renderUserStatusList (list) {
     const item = items[j]
     const userstatus = $(item.elm).find('.ui-user-status')
     const usericon = $(item.elm).find('.ui-user-icon')
+    const userColor = item.values().color || '#999'
     if (item.values().login && item.values().photo) {
       usericon.css('background-image', 'url(' + item.values().photo + ')')
       // add 1px more to right, make it feel aligned
       usericon.css('margin-right', '6px')
-      $(item.elm).css('border-left', '4px solid ' + item.values().color)
+      $(item.elm).css('border-left', '4px solid ' + userColor)
       usericon.css('margin-left', '-4px')
     } else {
-      usericon.css('background-color', item.values().color)
+      usericon.css('background-image', 'none')
+      usericon.css('background-color', userColor)
+      usericon.css('margin-right', '')
+      usericon.css('margin-left', '')
+      $(item.elm).css('border-left', '4px solid ' + userColor)
     }
     userstatus.removeClass(
       'ui-user-status-offline ui-user-status-online ui-user-status-idle'
