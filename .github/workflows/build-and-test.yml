@@ -2,9 +2,9 @@ name: Build & run tests
 
 on:
   push:
-    branches: [master]
+    branches: [bex-master, 'feature/**']
   pull_request:
-    branches: [master]
+    branches: [bex-master]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
@@ -34,7 +34,7 @@ jobs:
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v6
-        if: github.ref == 'refs/heads/master' && matrix.node-version == '22'
+        if: github.ref == 'refs/heads/bex-master' && matrix.node-version == '22'
         with:
           name: Prebuild with Node.js ${{ matrix.node-version }}
           path: |

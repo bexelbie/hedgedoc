@@ -2,9 +2,9 @@ name: Lint
 
 on:
   push:
-    branches: [master]
+    branches: [bex-master, 'feature/**']
   pull_request:
-    branches: [master]
+    branches: [bex-master]
 
 jobs:
   lint:
