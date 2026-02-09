@@ -80,22 +80,36 @@ describe('Author Color Palette', function () {
       assert.ok(colors.size > 10, `Expected diverse colors, got only ${colors.size} unique colors from 50 users`)
     })
 
-    it('should handle null userId', function () {
-      const color = palette.getColorForUserId(null)
-      assert.ok(typeof color === 'string', 'Should return a string for null userId')
-      assert.ok(palette.PALETTE.includes(color), 'Should return a valid palette color for null userId')
+    it('should handle null userId consistently', function () {
+      const color1 = palette.getColorForUserId(null)
+      const color2 = palette.getColorForUserId(null)
+      assert.ok(typeof color1 === 'string', 'Should return a string for null userId')
+      assert.ok(palette.PALETTE.includes(color1), 'Should return a valid palette color for null userId')
+      assert.strictEqual(color1, color2, 'Null userId should return same color consistently')
     })
 
-    it('should handle undefined userId', function () {
-      const color = palette.getColorForUserId(undefined)
-      assert.ok(typeof color === 'string', 'Should return a string for undefined userId')
-      assert.ok(palette.PALETTE.includes(color), 'Should return a valid palette color for undefined userId')
+    it('should handle undefined userId consistently', function () {
+      const color1 = palette.getColorForUserId(undefined)
+      const color2 = palette.getColorForUserId(undefined)
+      assert.ok(typeof color1 === 'string', 'Should return a string for undefined userId')
+      assert.ok(palette.PALETTE.includes(color1), 'Should return a valid palette color for undefined userId')
+      assert.strictEqual(color1, color2, 'Undefined userId should return same color consistently')
     })
 
-    it('should handle empty string userId', function () {
-      const color = palette.getColorForUserId('')
-      assert.ok(typeof color === 'string', 'Should return a string for empty string userId')
-      assert.ok(palette.PALETTE.includes(color), 'Should return a valid palette color for empty string userId')
+    it('should handle empty string userId consistently', function () {
+      const color1 = palette.getColorForUserId('')
+      const color2 = palette.getColorForUserId('')
+      assert.ok(typeof color1 === 'string', 'Should return a string for empty string userId')
+      assert.ok(palette.PALETTE.includes(color1), 'Should return a valid palette color for empty string userId')
+      assert.strictEqual(color1, color2, 'Empty string userId should return same color consistently')
+    })
+
+    it('should return same color for all falsy userIds', function () {
+      const colorNull = palette.getColorForUserId(null)
+      const colorUndefined = palette.getColorForUserId(undefined)
+      const colorEmpty = palette.getColorForUserId('')
+      assert.strictEqual(colorNull, colorUndefined, 'null and undefined should return same color')
+      assert.strictEqual(colorNull, colorEmpty, 'null and empty string should return same color')
     })
   })
 
