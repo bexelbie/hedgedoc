@@ -2280,6 +2280,19 @@ let authorMarks = {} // temp variable
 let addTextMarkers = [] // temp variable
 function updateInfo (data) {
   // console.debug(data);
+  if (debug && Object.prototype.hasOwnProperty.call(data, 'authors')) {
+    const authorIds = data.authors ? Object.keys(data.authors) : []
+    const sample = authorIds.length > 0 ? data.authors[authorIds[0]] : null
+    console.debug('DEBUG updateInfo authors', {
+      count: authorIds.length,
+      sample
+    })
+  }
+  if (debug && Object.prototype.hasOwnProperty.call(data, 'authorship')) {
+    console.debug('DEBUG updateInfo authorship', {
+      count: Array.isArray(data.authorship) ? data.authorship.length : null
+    })
+  }
   if (
     Object.prototype.hasOwnProperty.call(data, 'createtime') &&
     window.createtime !== data.createtime
@@ -2494,8 +2507,8 @@ function updateAuthorshipInner () {
     const textMarker = addTextMarkers[i]
     const author = authors[textMarker.userid]
     const rgbcolor = hex2rgb(author.color)
-    const colorString = `rgba(${rgbcolor.red},${rgbcolor.green},${rgbcolor.blue},0.7)`
-    const styleString = `background-image: linear-gradient(to top, ${colorString} 1px, transparent 1px);`
+    const colorString = `rgba(${rgbcolor.red},${rgbcolor.green},${rgbcolor.blue},0.35)`
+    const styleString = `background-color: ${colorString}; background-image: none;`
     const className = `authorship-inline-${author.color.substr(1)}`
     const rule = `.${className} { ${styleString} }`
     addStyleRule(rule)
@@ -2688,6 +2701,7 @@ socket.on('operation', function () {
 
 socket.on('online users', function (data) {
   if (debug) {
+    console.debug('DEBUG online users payload', data)
     console.debug(data)
   }
   onlineUsers = data.users
@@ -2912,14 +2926,26 @@ function renderUserStatusList (list) {
     const item = items[j]
     const userstatus = $(item.elm).find('.ui-user-status')
     const usericon = $(item.elm).find('.ui-user-icon')
+    const userColor = item.values().color || '#999'
     if (item.values().login && item.values().photo) {
       usericon.css('background-image', 'url(' + item.values().photo + ')')
       // add 1px more to right, make it feel aligned
       usericon.css('margin-right', '6px')
-      $(item.elm).css('border-left', '4px solid ' + item.values().color)
+      $(item.elm).css('border-left', '4px solid ' + userColor)
       usericon.css('margin-left', '-4px')
     } else {
-      usericon.css('background-color', item.values().color)
+      usericon.css('background-image', 'none')
+      usericon.css('background-color', userColor)
+      usericon.css('margin-right', '')
+      usericon.css('margin-left', '')
+      $(item.elm).css('border-left', '4px solid ' + userColor)
+    }
+    if (debug) {
+      console.debug('DEBUG renderUserStatusList item', {
+        id: item.values().id,
+        login: item.values().login,
+        color: item.values().color
+      })
     }
     userstatus.removeClass(
       'ui-user-status-offline ui-user-status-online ui-user-status-idle'
