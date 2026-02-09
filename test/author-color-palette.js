@@ -30,10 +30,10 @@ describe('Author Color Palette', function () {
         const r = parseInt(color.slice(1, 3), 16)
         const g = parseInt(color.slice(3, 5), 16)
         const b = parseInt(color.slice(5, 7), 16)
-        
+
         const luminance = palette.getRelativeLuminance(r, g, b)
         const contrast = palette.getContrastRatio(luminance, darkBgLuminance)
-        
+
         assert.ok(contrast >= minContrast, `Color ${color} has contrast ${contrast.toFixed(2)} against dark bg, expected >= ${minContrast}`)
       })
     })
@@ -47,10 +47,10 @@ describe('Author Color Palette', function () {
         const r = parseInt(color.slice(1, 3), 16)
         const g = parseInt(color.slice(3, 5), 16)
         const b = parseInt(color.slice(5, 7), 16)
-        
+
         const luminance = palette.getRelativeLuminance(r, g, b)
         const contrast = palette.getContrastRatio(luminance, lightBgLuminance)
-        
+
         assert.ok(contrast >= minContrast, `Color ${color} has contrast ${contrast.toFixed(2)} against light bg, expected >= ${minContrast}`)
       })
     })
