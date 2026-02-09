@@ -2615,11 +2615,8 @@ let cmClient = null
 let synchronized_ = null
 
 function havePendingOperation () {
-  return !!(
-    cmClient &&
-    cmClient.state &&
-    Object.prototype.hasOwnProperty.call(cmClient, 'outstanding')
-  )
+  // There is only a real pending op if `outstanding` is set.
+  return !!(cmClient && cmClient.outstanding)
 }
 
 socket.on('doc', function (obj) {
