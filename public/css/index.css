@@ -548,7 +548,7 @@ div[contenteditable]:empty:not(:focus):before{
 
 .ui-theme-toggle,
 .ui-spellcheck-toggle {
-    opacity: 0.2;
+    opacity: 0.5;
     cursor: pointer;
 }
 
@@ -627,6 +627,59 @@ div[contenteditable]:empty:not(:focus):before{
 
 .status-bar .dropdown-menu > li > a:focus, .status-bar .dropdown-menu > li > a:hover {
     background-color: #212121;
+}
+
+/* Light theme statusbar styling */
+.status-bar.editor-light-theme {
+    background: #f5f5f5;
+    border-top: 1px solid #ddd;
+    color: #333;
+}
+
+.status-bar.editor-light-theme .status-info {
+    color: #333;
+}
+
+.status-bar.editor-light-theme .status-file {
+    color: #666;
+}
+
+.status-bar.editor-light-theme .status-indicators {
+    background: #f5f5f5;
+    color: #333;
+}
+
+.status-bar.editor-light-theme .status-indicators > div {
+    border-left: 1px solid #ddd;
+}
+
+.status-bar.editor-light-theme .indent-width-input {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    color: #333;
+}
+
+.status-bar.editor-light-theme .indent-width-input:focus {
+    border: 1px solid #2893ef;
+}
+
+.status-bar.editor-light-theme .dropdown-menu {
+    background-color: #fff;
+    color: #333;
+    border: 1px solid #ccc !important;
+}
+
+.status-bar.editor-light-theme .dropdown-menu .divider {
+    background-color: #ddd;
+}
+
+.status-bar.editor-light-theme .dropdown-menu > li > a {
+    color: #333;
+}
+
+.status-bar.editor-light-theme .dropdown-menu > li > a:focus,
+.status-bar.editor-light-theme .dropdown-menu > li > a:hover {
+    background-color: #f0f0f0;
 }
 
 @media print {

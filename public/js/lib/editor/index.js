@@ -522,8 +522,10 @@ export default class Editor {
       const theme = this.editor.getOption('theme')
       if (theme === 'one-dark') {
         themeToggle.removeClass('active')
+        this.statusBar.removeClass('editor-light-theme')
       } else {
         themeToggle.addClass('active')
+        this.statusBar.addClass('editor-light-theme')
       }
     }
 
