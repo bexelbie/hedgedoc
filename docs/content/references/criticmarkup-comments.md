@@ -74,11 +74,38 @@ styled for **night mode** and adapt automatically when you switch themes.
 | **Both mode** (split view) | Inline pill + click-to-open popover |
 | **Published / pretty-print view** | Comments are hidden (stripped) |
 
+## Downloading and copying without comments
+
+The **Menu** in the top navigation bar offers options for exporting your note
+without CriticMarkup comments:
+
+### Download
+
+- **Markdown** — downloads the raw Markdown including comments.
+- **Markdown no Comments** — downloads the Markdown with all `{>> ... <<}`
+  comment syntax stripped out, giving you a clean file.
+
+### Copy to Clipboard
+
+Below the Download section, the **Copy to Clipboard** group provides four
+options:
+
+- **Markdown** — copies the raw Markdown to your clipboard.
+- **Markdown no Comments** — copies the Markdown with comments stripped.
+- **HTML** — copies the rendered HTML output.
+- **Raw HTML** — copies the raw HTML output.
+
+Each option closes the menu and shows a brief green confirmation toast at the
+top of the page.
+
 ## Tips
 
 - Keep comment text concise — margin bubbles are most readable when they are
   short.
 - Use the "Hide/Show comments" toggle to get a distraction-free reading
   experience while reviewing a document.
+- Use **Download → Markdown no Comments** or **Copy to Clipboard → Markdown no
+  Comments** when you want to share or export a clean version of your document
+  without any review annotations.
 - Remember that comments are **never visible** in the published version of a
   note, so you can freely annotate without worrying about public readers.

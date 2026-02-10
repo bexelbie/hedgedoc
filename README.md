@@ -1,3 +1,42 @@
+## Fork Enhancements
+
+This fork adds several features on top of upstream HedgeDoc:
+
+### CriticMarkup Comments
+
+Inline annotations using CriticMarkup syntax (`{>> comment text <<}`).
+
+- **Edit mode** — comments are syntax-highlighted and can be collapsed or expanded with a toolbar button.
+- **View mode on wide screens** (≥ 993 px) — comments appear as margin side bubbles next to the content, Google Docs-style.
+- **View mode on narrow screens / Both mode** — comments display as clickable inline pills with popovers.
+- **Published view** — comments are stripped automatically so readers see a clean document.
+- A **"Hide/Show comments"** toggle in the Table of Contents menu controls all comment UI.
+
+See the [CriticMarkup Comments documentation][criticmarkup-docs] for details.
+
+### Download & Copy to Clipboard
+
+The main menu includes enhanced export options:
+
+- **Download "Markdown no Comments"** — downloads the note as a `.md` file with all CriticMarkup comments stripped out.
+- **Copy to Clipboard** section with four options: Markdown, Markdown no Comments, HTML, and Raw HTML. Each copies the content and shows a brief confirmation toast.
+
+### Authorship & Collaboration Improvements
+
+- **WCAG contrast-safe author color palette** — 212 pre-validated colors that meet WCAG 3:1 contrast ratio requirements against both light and dark editor backgrounds.
+- **Persistent guest identities** — guest (anonymous) users get stable identities via UUID v5, so their authorship colors and names persist across reconnects.
+- **Improved authorship styling** — inline authorship uses semi-transparent background highlights instead of thin underlines for better visibility.
+- **Author colors toggle** — a paint-brush button in the navbar lets you show or hide author color highlights. State persists across sessions.
+- **Author color normalization** — accepts various color formats (hex, rgb, short hex) and normalizes to `#rrggbb` for consistent rendering.
+
+### UI Polish
+
+- **Light theme status bar** — the editor status bar is fully styled for the light theme with proper contrast.
+
+[criticmarkup-docs]: https://docs.hedgedoc.org/references/criticmarkup-comments/
+
+---
+
 ![HedgeDoc Logo](docs/content/images/hedgedoc_logo_black.svg)
 
 # HedgeDoc
@@ -52,21 +91,6 @@ HedgeDoc can integrate with
 - dropbox **for export and import**
 
 More info about that can be found in the configuration docs above.
-
-## CriticMarkup Comments
-
-This fork adds support for **CriticMarkup comments** (`{>> comment text <<}`),
-giving collaborators a way to leave inline annotations on any note.
-
-- **Edit mode** — comments are syntax-highlighted and can be collapsed or expanded with a toolbar button.
-- **View mode on wide screens** (≥ 993 px) — comments appear as margin side bubbles next to the content, Google Docs-style.
-- **View mode on narrow screens / Both mode** — comments display as clickable inline pills with popovers.
-- **Published view** — comments are stripped automatically so readers see a clean document.
-- A **"Hide/Show comments"** toggle in the Table of Contents menu controls all comment UI.
-
-See the [CriticMarkup Comments documentation][criticmarkup-docs] for details.
-
-[criticmarkup-docs]: https://docs.hedgedoc.org/references/criticmarkup-comments/
 
 ## Browser support
 
