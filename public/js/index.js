@@ -44,6 +44,7 @@ import {
   deduplicatedHeaderId,
   exportToHTML,
   exportToRawHTML,
+  generateCleanHTML,
   removeDOMEvents,
   finishView,
   generateToc,
@@ -1239,6 +1240,19 @@ ui.toolbar.download.markdown.click(function (e) {
   })
   saveAs(blob, filename, true)
 })
+// markdown without comments
+ui.toolbar.download.markdownNoComments.click(function (e) {
+  e.preventDefault()
+  e.stopPropagation()
+  const filename = renderFilename(ui.area.markdown) + '.md'
+  const markdown = editor.getValue()
+  // Strip CriticMarkup comment syntax: {>> comment text <<}
+  const stripped = markdown.replace(/\{>>[\s\S]*?<<\}/g, '')
+  const blob = new Blob([stripped], {
+    type: 'text/markdown;charset=utf-8'
+  })
+  saveAs(blob, filename, true)
+})
 // html
 ui.toolbar.download.html.click(function (e) {
   e.preventDefault()
@@ -1250,6 +1264,81 @@ ui.toolbar.download.rawhtml.click(function (e) {
   e.preventDefault()
   e.stopPropagation()
   exportToRawHTML(ui.area.markdown)
+})
+
+// helper: copy text to clipboard, close dropdown, show toast
+function copyToClipboard (text, label) {
+  // close the dropdown menu by removing .open from parent
+  $(document).find('.open').removeClass('open')
+  navigator.clipboard.writeText(text).then(function () {
+    showCopyToast(label + ' copied to clipboard')
+  }, function () {
+    showCopyToast('Failed to copy', true)
+  })
+}
+
+function showCopyToast (message, isError) {
+  // remove any existing toast
+  $('.copy-toast').remove()
+  const bg = isError ? '#d9534f' : '#5cb85c'
+  const toast = $('<div class="copy-toast"></div>')
+    .text(message)
+    .css({
+      position: 'fixed',
+      top: '20px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      background: bg,
+      color: '#fff',
+      padding: '10px 24px',
+      borderRadius: '4px',
+      fontSize: '14px',
+      fontWeight: '500',
+      zIndex: 99999,
+      boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+      opacity: 0,
+      transition: 'opacity 0.3s ease'
+    })
+  $('body').append(toast)
+  // trigger reflow then fade in
+  toast[0].offsetHeight // eslint-disable-line no-unused-expressions
+  toast.css('opacity', 1)
+  setTimeout(function () {
+    toast.css('opacity', 0)
+    setTimeout(function () { toast.remove() }, 300)
+  }, 1500)
+}
+
+// copy to clipboard
+// copy markdown
+ui.toolbar.copy.markdown.click(function (e) {
+  e.preventDefault()
+  e.stopPropagation()
+  copyToClipboard(editor.getValue(), 'Markdown')
+})
+// copy markdown without comments
+ui.toolbar.copy.markdownNoComments.click(function (e) {
+  e.preventDefault()
+  e.stopPropagation()
+  const markdown = editor.getValue()
+  const stripped = markdown.replace(/\{>>[\s\S]*?<<\}/g, '')
+  copyToClipboard(stripped, 'Markdown (no comments)')
+})
+// copy html
+ui.toolbar.copy.html.click(function (e) {
+  e.preventDefault()
+  e.stopPropagation()
+  const src = generateCleanHTML(ui.area.markdown)
+  $(src).find('a.anchor').remove()
+  copyToClipboard(src[0].outerHTML, 'HTML')
+})
+// copy raw html
+ui.toolbar.copy.rawhtml.click(function (e) {
+  e.preventDefault()
+  e.stopPropagation()
+  const src = generateCleanHTML(ui.area.markdown)
+  $(src).find('a.anchor').remove()
+  copyToClipboard(src[0].outerHTML, 'Raw HTML')
 })
 // export to dropbox
 ui.toolbar.export.dropbox.click(function (event) {

@@ -16,8 +16,15 @@ export const getUIElements = () => ({
     },
     download: {
       markdown: $('.ui-download-markdown'),
+      markdownNoComments: $('.ui-download-markdown-no-comments'),
       html: $('.ui-download-html'),
       rawhtml: $('.ui-download-raw-html')
+    },
+    copy: {
+      markdown: $('.ui-copy-markdown'),
+      markdownNoComments: $('.ui-copy-markdown-no-comments'),
+      html: $('.ui-copy-html'),
+      rawhtml: $('.ui-copy-raw-html')
     },
     export: {
       dropbox: $('.ui-save-dropbox'),

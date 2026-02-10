@@ -754,7 +754,7 @@ function toDataURL (url, callback) {
   })
 }
 
-function generateCleanHTML (view) {
+export function generateCleanHTML (view) {
   const src = view.clone()
   const eles = src.find('*')
   // remove syncscroll parts
