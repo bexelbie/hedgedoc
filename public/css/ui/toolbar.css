@@ -31,3 +31,29 @@ body.night .toolbar > .btn-toolbar > .btn-group > .btn:hover {
   background-color: #37373b;
   padding: 5px;
 }
+
+.cm-critic-comment {
+  display: inline-block;
+  padding: 0 4px;
+  margin: 0 1px;
+  border: 1px solid #d0a64b;
+  border-radius: 3px;
+  background: #fff5d6;
+  color: #7a5a1a;
+  font-size: 0.75em;
+  line-height: 1.4;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.cm-critic-comment-marker {
+  letter-spacing: 0.02em;
+  font-size: 0.9em;
+  line-height: 1;
+}
+
+body.night .cm-critic-comment {
+  border-color: #8f6b28;
+  background: #2b2314;
+  color: #e2c089;
+}

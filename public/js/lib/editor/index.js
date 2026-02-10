@@ -212,6 +212,13 @@ export default class Editor {
     }
     this.eventListeners = {}
     this.config = config
+    this.criticMarkers = []
+    this.criticRevealMarks = []
+    this.criticRefreshTimer = null
+    this.criticEnabled = false
+    this.criticClipboardHandlersBound = false
+    this.criticHidden = false
+    this.criticToggle = null
   }
 
   on (event, cb) {
@@ -248,6 +255,7 @@ export default class Editor {
     const makeLine = $('#makeLine')
     const makeComment = $('#makeComment')
     const uploadImage = $('#uploadImage')
+    const toggleCritic = $('#toggleCritic')
 
     makeBold.click(() => {
       utils.wrapTextWith(this.editor, this.editor, '**')
@@ -308,6 +316,15 @@ export default class Editor {
     makeComment.click(() => {
       utils.insertText(this.editor, '> []')
     })
+
+    if (toggleCritic.length) {
+      this.criticToggle = toggleCritic
+      this.updateCriticToggle()
+      toggleCritic.click(() => {
+        this.setCriticHidden(!this.criticHidden)
+        this.editor.focus()
+      })
+    }
 
     uploadImage.bind('change', function (e) {
       const files = e.target.files || e.dataTransfer.files
@@ -660,6 +677,389 @@ export default class Editor {
 
     overrideBrowserKeymap.change(() => {
       this.setOverrideBrowserKeymap()
+    })
+  }
+
+  loadCriticHiddenState () {
+    const cookieValue = Cookies.get('critic-markup-hidden')
+    if (cookieValue === undefined) {
+      return false
+    }
+    return cookieValue === true || cookieValue === 'true'
+  }
+
+  setCriticHidden (hidden) {
+    this.criticHidden = hidden
+    Cookies.set('critic-markup-hidden', hidden, {
+      expires: 365,
+      sameSite: window.cookiePolicy,
+      secure: window.location.protocol === 'https:'
+    })
+    if (!hidden) {
+      this.clearCriticRevealMarks()
+    }
+    this.updateCriticToggle()
+    this.refreshCriticMarkup()
+  }
+
+  updateCriticToggle () {
+    if (!this.criticToggle) {
+      return
+    }
+    this.criticToggle.toggleClass('active', this.criticHidden)
+    this.criticToggle.attr(
+      'title',
+      this.criticHidden ? 'Show critic comments' : 'Hide critic comments'
+    )
+    this.criticToggle.attr('aria-pressed', this.criticHidden ? 'true' : 'false')
+  }
+
+  enableCriticMarkup () {
+    if (this.criticEnabled || !this.editor) {
+      return
+    }
+    this.criticEnabled = true
+    this.criticHidden = this.loadCriticHiddenState()
+    this.updateCriticToggle()
+    this.refreshCriticMarkup()
+    this.bindCriticClipboardHandlers()
+    this.editor.on('changes', () => {
+      this.scheduleCriticRefresh()
+    })
+    this.editor.on('cursorActivity', () => {
+      this.revealCriticAtCursor()
+    })
+    this.editor.on('beforeChange', (cm, change) => {
+      this.expandCriticForChange(change)
+    })
+  }
+
+  scheduleCriticRefresh () {
+    if (!this.criticHidden) {
+      return
+    }
+    if (this.criticRefreshTimer) {
+      clearTimeout(this.criticRefreshTimer)
+    }
+    this.criticRefreshTimer = setTimeout(() => {
+      this.criticRefreshTimer = null
+      this.refreshCriticMarkup()
+    }, 150)
+  }
+
+  refreshCriticMarkup () {
+    if (!this.editor) {
+      return
+    }
+    this.clearCriticMarkers()
+    if (!this.criticHidden) {
+      return
+    }
+    const text = this.editor.getValue()
+    if (!text.includes('{>>')) {
+      return
+    }
+    const regex = /\{>>((?!\{>>)[\s\S])*?<<\}/g
+    let match
+    while ((match = regex.exec(text)) !== null) {
+      const commentText = match[0].slice(3, -3)
+      const from = this.editor.posFromIndex(match.index)
+      const to = this.editor.posFromIndex(match.index + match[0].length)
+      if (this.isCriticRangeRevealed(from, to)) {
+        continue
+      }
+      const widget = document.createElement('span')
+      widget.className = 'cm-critic-comment'
+      widget.setAttribute('contenteditable', 'false')
+      widget.setAttribute('tabindex', '-1')
+      const markerSpan = document.createElement('span')
+      markerSpan.className = 'cm-critic-comment-marker'
+      markerSpan.textContent = '◊'
+      widget.setAttribute('title', commentText || 'Critic comment')
+      widget.appendChild(markerSpan)
+      widget.addEventListener('click', event => {
+        event.preventDefault()
+        event.stopPropagation()
+        this.revealCriticAtRange(from, to)
+        this.editor.focus()
+      })
+      const marker = this.editor.markText(from, to, {
+        replacedWith: widget,
+        inclusiveLeft: false,
+        inclusiveRight: false,
+        atomic: true,
+        handleMouseEvents: true
+      })
+      this.criticMarkers.push({ marker, widget })
+    }
+
+  }
+
+  clearCriticMarkers () {
+    if (!this.criticMarkers.length) {
+      return
+    }
+    this.criticMarkers.forEach(entry => entry.marker.clear())
+    this.criticMarkers = []
+  }
+
+  clearCriticRevealMarks () {
+    if (!this.criticRevealMarks.length) {
+      return
+    }
+    this.criticRevealMarks.forEach(mark => mark.clear())
+    this.criticRevealMarks = []
+  }
+
+  bindCriticClipboardHandlers () {
+    if (this.criticClipboardHandlersBound) {
+      return
+    }
+    const wrapper = this.editor.getWrapperElement()
+    if (!wrapper) {
+      return
+    }
+    this.criticClipboardHandlersBound = true
+    wrapper.addEventListener('copy', event => {
+      this.handleCriticClipboardEvent(event, false)
+    })
+    wrapper.addEventListener('cut', event => {
+      this.handleCriticClipboardEvent(event, true)
+    })
+  }
+
+  handleCriticClipboardEvent (event, isCut) {
+    if (!event.clipboardData) {
+      return
+    }
+    if (!this.criticHidden) {
+      return
+    }
+    const selections = this.editor.listSelections()
+    const expandedSelections = this.expandSelectionsForCritic(selections)
+    if (!expandedSelections) {
+      return
+    }
+    const originalSelections = selections.map(selection => ({
+      anchor: selection.anchor,
+      head: selection.head
+    }))
+    this.editor.setSelections(expandedSelections)
+    const selectionText = this.editor.getSelections().join('\n')
+    event.clipboardData.setData('text/plain', selectionText)
+    event.preventDefault()
+    if (isCut) {
+      this.editor.replaceSelections(
+        new Array(expandedSelections.length).fill(''),
+        'around'
+      )
+    } else {
+      this.editor.setSelections(originalSelections)
+    }
+  }
+
+  expandSelectionsForCritic (selections) {
+    if (!this.criticHidden) {
+      return null
+    }
+    const markerRanges = this.getCriticMarkerRanges()
+    const revealRanges = this.criticRevealMarks
+      .map(mark => mark.find())
+      .filter(Boolean)
+    const allRanges = markerRanges.concat(revealRanges)
+    if (!allRanges.length) {
+      return null
+    }
+    let changed = false
+    const expandedSelections = selections.map(selection => {
+      let anchor = selection.anchor
+      let head = selection.head
+      let start = CodeMirror.cmpPos(anchor, head) <= 0 ? anchor : head
+      let end = CodeMirror.cmpPos(anchor, head) <= 0 ? head : anchor
+      allRanges.forEach(range => {
+        if (!range) {
+          return
+        }
+        if (CodeMirror.cmpPos(start, range.to) === 0) {
+          start = range.from
+          changed = true
+        }
+        if (CodeMirror.cmpPos(end, range.from) === 0) {
+          end = range.to
+          changed = true
+        }
+      })
+      if (CodeMirror.cmpPos(anchor, head) <= 0) {
+        anchor = start
+        head = end
+      } else {
+        anchor = end
+        head = start
+      }
+      return { anchor, head }
+    })
+    return changed ? expandedSelections : null
+  }
+
+  getCriticMarkerRanges () {
+    return this.criticMarkers
+      .map(entry => entry.marker.find())
+      .filter(Boolean)
+  }
+
+  revealCriticAtCursor () {
+    if (!this.criticHidden) {
+      return
+    }
+    const selections = this.editor.listSelections()
+    if (!selections || !selections.length) {
+      return
+    }
+
+    // Reveal any atomic markers the cursor touches
+    const entries = this.getCriticMarkerEntries()
+    if (entries.length) {
+      selections.forEach(selection => {
+        const start = CodeMirror.cmpPos(selection.anchor, selection.head) <= 0
+          ? selection.anchor
+          : selection.head
+        const end = CodeMirror.cmpPos(selection.anchor, selection.head) <= 0
+          ? selection.head
+          : selection.anchor
+        entries.forEach(entry => {
+          const range = entry.marker.find()
+          if (!range) {
+            return
+          }
+          const touchesStart = CodeMirror.cmpPos(start, range.to) === 0
+          const touchesEnd = CodeMirror.cmpPos(end, range.from) === 0
+          const overlaps = CodeMirror.cmpPos(end, range.from) > 0 && CodeMirror.cmpPos(start, range.to) < 0
+          if (touchesStart || touchesEnd || overlaps) {
+            this.revealCriticEntry(entry)
+          }
+        })
+      })
+    }
+
+    // Re-hide any revealed marks the cursor has moved away from
+    this.rehideCriticAwayFromCursor(selections)
+  }
+
+  rehideCriticAwayFromCursor (selections) {
+    if (!this.criticRevealMarks.length) {
+      return
+    }
+    const toRehide = []
+    this.criticRevealMarks.forEach((mark, index) => {
+      const range = mark.find()
+      if (!range) {
+        toRehide.push(index)
+        return
+      }
+      const cursorTouches = selections.some(selection => {
+        const start = CodeMirror.cmpPos(selection.anchor, selection.head) <= 0
+          ? selection.anchor
+          : selection.head
+        const end = CodeMirror.cmpPos(selection.anchor, selection.head) <= 0
+          ? selection.head
+          : selection.anchor
+        // Cursor is inside or adjacent to the revealed range
+        return CodeMirror.cmpPos(start, range.to) <= 0 && CodeMirror.cmpPos(end, range.from) >= 0
+      })
+      if (!cursorTouches) {
+        toRehide.push(index)
+      }
+    })
+    if (!toRehide.length) {
+      return
+    }
+    // Remove in reverse order to keep indices valid
+    for (let i = toRehide.length - 1; i >= 0; i--) {
+      const idx = toRehide[i]
+      const mark = this.criticRevealMarks[idx]
+      mark.clear()
+      this.criticRevealMarks.splice(idx, 1)
+    }
+    // Schedule a refresh to re-create the atomic markers for re-hidden ranges
+    this.scheduleCriticRefresh()
+  }
+
+  expandCriticForChange (change) {
+    if (!this.criticHidden || !change) {
+      return
+    }
+    const entries = this.getCriticMarkerEntries()
+    if (!entries.length) {
+      return
+    }
+    const start = change.from
+    const end = change.to
+    entries.forEach(entry => {
+      const range = entry.marker.find()
+      if (!range) {
+        return
+      }
+      const touchesStart = CodeMirror.cmpPos(start, range.to) === 0
+      const touchesEnd = CodeMirror.cmpPos(end, range.from) === 0
+      const overlaps = CodeMirror.cmpPos(end, range.from) > 0 && CodeMirror.cmpPos(start, range.to) < 0
+      if (touchesStart || touchesEnd || overlaps) {
+        this.revealCriticEntry(entry)
+      }
+    })
+  }
+
+  getCriticMarkerEntries () {
+    return this.criticMarkers.filter(entry => entry && entry.marker)
+  }
+
+  revealCriticEntry (entry) {
+    if (!entry || !entry.marker) {
+      return
+    }
+    const range = entry.marker.find()
+    if (!range) {
+      return
+    }
+    this.revealCriticAtRange(range.from, range.to)
+  }
+
+  revealCriticAtRange (from, to) {
+    const entryIndex = this.criticMarkers.findIndex(entry => {
+      const range = entry.marker.find()
+      if (!range) {
+        return false
+      }
+      return CodeMirror.cmpPos(range.from, from) === 0 && CodeMirror.cmpPos(range.to, to) === 0
+    })
+    if (entryIndex !== -1) {
+      this.criticMarkers[entryIndex].marker.clear()
+      this.criticMarkers.splice(entryIndex, 1)
+    }
+    this.addCriticRevealMark(from, to)
+  }
+
+  addCriticRevealMark (from, to) {
+    if (!this.editor) {
+      return
+    }
+    const mark = this.editor.markText(from, to, {
+      className: 'cm-critic-comment-revealed',
+      inclusiveLeft: false,
+      inclusiveRight: false
+    })
+    this.criticRevealMarks.push(mark)
+  }
+
+  isCriticRangeRevealed (from, to) {
+    if (!this.criticRevealMarks.length) {
+      return false
+    }
+    return this.criticRevealMarks.some(mark => {
+      const range = mark.find()
+      if (!range) {
+        return false
+      }
+      return CodeMirror.cmpPos(to, range.from) > 0 && CodeMirror.cmpPos(from, range.to) < 0
     })
   }
 

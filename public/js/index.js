@@ -505,6 +505,7 @@ if (!textit) {
 
 const editorInstance = new Editor()
 const editor = editorInstance.init(textit)
+editorInstance.enableCriticMarkup()
 
 // FIXME: global referncing in jquery-textcomplete patch
 window.editor = editor
