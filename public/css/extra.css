@@ -320,7 +320,7 @@ iframe.github-gist-frame {
     overflow: auto;
 }
 
-.expand-toggle, .back-to-top, .go-to-bottom {
+.expand-toggle, .back-to-top, .go-to-bottom, .toggle-critic-comments {
     display: block;
     padding: 4px 10px;
     margin-top: 10px;
@@ -330,12 +330,12 @@ iframe.github-gist-frame {
     color: #999;
 }
 
-.expand-toggle:hover, .expand-toggle:focus, .back-to-top:hover, .back-to-top:focus, .go-to-bottom:hover, .go-to-bottom:focus {
+.expand-toggle:hover, .expand-toggle:focus, .back-to-top:hover, .back-to-top:focus, .go-to-bottom:hover, .go-to-bottom:focus, .toggle-critic-comments:hover, .toggle-critic-comments:focus {
     color: #563d7c;
     text-decoration: none;
 }
 
-.back-to-top, .go-to-bottom {
+.back-to-top, .go-to-bottom, .toggle-critic-comments {
     margin-top: 0;
 }
 
@@ -414,4 +414,123 @@ small .dropdown a:focus, small .dropdown a:hover {
     a[href]:after {
         font-size: 12px !important;
     }
+}
+
+/* ======================================
+   CriticMarkup Comment Rendering (Preview)
+   ====================================== */
+
+/* Inline comment pill/icon */
+.critic-comment {
+  display: inline-block;
+  position: relative;
+  margin: 0 2px;
+  padding: 0 3px;
+  border: 1px solid #d0a64b;
+  border-radius: 3px;
+  background: #fff5d6;
+  color: #c08b1d;
+  font-size: 0.8em;
+  line-height: 1.4;
+  vertical-align: middle;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.critic-comment:hover {
+  background: #ffecb3;
+  border-color: #b8912e;
+}
+
+.critic-comment.active {
+  background: #ffe082;
+  border-color: #b8912e;
+}
+
+/* Popover bubble (shown when .active) */
+.critic-comment .critic-comment-popover {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 8px;
+  padding: 8px 12px;
+  min-width: 120px;
+  max-width: 300px;
+  background: #fff;
+  border: 1px solid #d0a64b;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  color: #333;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  z-index: 1050;
+  text-align: left;
+  cursor: default;
+}
+
+/* Arrow pointing up to the pill */
+.critic-comment .critic-comment-popover::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-bottom-color: #d0a64b;
+}
+
+.critic-comment .critic-comment-popover::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-bottom-color: #fff;
+}
+
+/* Show popover when pill is active */
+.critic-comment.active .critic-comment-popover {
+  display: block;
+}
+
+/* Hidden state — when toggle is off, hide all comment pills */
+.critic-comments-hidden .critic-comment {
+  display: none;
+}
+
+/* Night mode */
+body.night .critic-comment {
+  border-color: #8f6b28;
+  background: #2b2314;
+  color: #e2c089;
+}
+
+body.night .critic-comment:hover {
+  background: #3a3018;
+  border-color: #a67f30;
+}
+
+body.night .critic-comment.active {
+  background: #3a3018;
+  border-color: #a67f30;
+}
+
+body.night .critic-comment .critic-comment-popover {
+  background: #2b2314;
+  border-color: #8f6b28;
+  color: #d4c4a0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+body.night .critic-comment .critic-comment-popover::before {
+  border-bottom-color: #8f6b28;
+}
+
+body.night .critic-comment .critic-comment-popover::after {
+  border-bottom-color: #2b2314;
 }

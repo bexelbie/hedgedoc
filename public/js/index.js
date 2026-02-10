@@ -700,6 +700,10 @@ $(document).ready(function () {
   $(document).on('click', '.toggle-dropdown .dropdown-menu', function (e) {
     e.stopPropagation()
   })
+  // dismiss critic comment popovers on click outside
+  $(document).on('click', function () {
+    $('.critic-comment.active').removeClass('active')
+  })
 })
 // when page resize
 $(window).resize(function () {
@@ -2094,6 +2098,11 @@ ui.infobar.permission.protected.click(function () {
 ui.infobar.delete.click(function () {
   $('.delete-modal').modal('show')
 })
+
+// Restore preview critic toggle state
+if (store.get('preview-critic-hidden')) {
+  ui.area.markdown.addClass('critic-comments-hidden')
+}
 $('.ui-delete-modal-confirm').click(function () {
   socket.emit('delete')
 })

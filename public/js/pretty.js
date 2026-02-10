@@ -59,6 +59,8 @@ $(document.body).show()
 
 removeDOMEvents(markdown)
 finishView(markdown)
+// Strip CriticMarkup comments from published view
+markdown.find('.critic-comment').remove()
 autoLinkify(markdown)
 deduplicatedHeaderId(markdown)
 renderTOC(markdown)

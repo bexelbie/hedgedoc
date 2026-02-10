@@ -1,6 +1,14 @@
 .toolbar {
   background-color: #fafafa;
   border: 1px solid #ededed;
+  display: flex;
+}
+
+.toolbar > .btn-toolbar {
+  display: flex;
+  flex: 1;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .toolbar > .btn-toolbar > .btn-group > .btn {
@@ -30,6 +38,36 @@ body.night .toolbar > .btn-toolbar > .btn-group > .btn {
 body.night .toolbar > .btn-toolbar > .btn-group > .btn:hover {
   background-color: #37373b;
   padding: 5px;
+}
+
+/* Right-aligned toolbar toggles with separator */
+.toolbar-toggles {
+  border-left: 1px solid #ccc;
+  margin-left: auto;
+  padding-left: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.toolbar-toggles > .btn {
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.toolbar-toggles > .btn.active {
+  opacity: 1;
+}
+
+.toolbar-toggles > .btn:hover {
+  opacity: 0.8;
+}
+
+body.night .toolbar-toggles {
+  border-left-color: #555;
+}
+
+body.night .toolbar-toggles > .btn {
+  color: #5EB7E0;
 }
 
 .cm-critic-comment {

@@ -5,6 +5,7 @@ import Prism from 'prismjs'
 import PDFObject from 'pdfobject'
 import { saveAs } from 'file-saver'
 import filterXSS from 'xss'
+import store from 'store'
 
 import getUIElements from './lib/editor/ui-elements'
 import { escapeHtml, unescapeHtml } from './utils'
@@ -543,6 +544,28 @@ export function finishView (view) {
   }
   // render title
   document.title = renderTitle(view)
+
+  // CriticMarkup comment popovers
+  view.find('.critic-comment').each(function () {
+    const $el = $(this)
+    // Only add popover once (avoid duplicates on re-render)
+    if ($el.find('.critic-comment-popover').length === 0) {
+      const commentText = $el.attr('data-comment') || ''
+      const $popover = $('<span class="critic-comment-popover"></span>')
+      $popover.text(commentText)
+      $el.append($popover)
+    }
+    // Toggle active on click
+    $el.off('click.critic').on('click.critic', function (e) {
+      e.stopPropagation()
+      const wasActive = $el.hasClass('active')
+      // Close all other open popovers
+      view.find('.critic-comment.active').removeClass('active')
+      if (!wasActive) {
+        $el.addClass('active')
+      }
+    })
+  })
 }
 
 // only static transform should be here
@@ -784,7 +807,25 @@ export function generateToc (id) {
     if (window.scrollToBottom) { window.scrollToBottom() }
     removeHash()
   })
-  tocMenu.append(toggle).append(backtotop).append(gotobottom)
+  const criticToggle = $('<a class="toggle-critic-comments" href="#">Hide comments</a>')
+  // Sync initial label with current state
+  if ($('.markdown-body').hasClass('critic-comments-hidden')) {
+    criticToggle.text('Show comments')
+  }
+  criticToggle.click(e => {
+    e.preventDefault()
+    e.stopPropagation()
+    const $markdown = $('.markdown-body')
+    $markdown.toggleClass('critic-comments-hidden')
+    const hidden = $markdown.hasClass('critic-comments-hidden')
+    // Update all toggle links (both toc and affix)
+    $('.toggle-critic-comments').text(hidden ? 'Show comments' : 'Hide comments')
+    if (hidden) {
+      $markdown.find('.critic-comment.active').removeClass('active')
+    }
+    store.set('preview-critic-hidden', hidden)
+  })
+  tocMenu.append(toggle).append(backtotop).append(gotobottom).append(criticToggle)
   target.append(tocMenu)
 }
 
@@ -1021,6 +1062,7 @@ md.use(require('markdown-it-mark'))
 md.use(require('markdown-it-ins'))
 md.use(require('markdown-it-sub'))
 md.use(require('markdown-it-sup'))
+md.use(require('./lib/markdown-it-critic-comment'))
 md.use(require('markdown-it-mathjax')({
   beforeMath: '<span class="mathjax raw">',
   afterMath: '</span>',

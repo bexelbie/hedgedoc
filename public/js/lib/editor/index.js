@@ -255,7 +255,6 @@ export default class Editor {
     const makeLine = $('#makeLine')
     const makeComment = $('#makeComment')
     const uploadImage = $('#uploadImage')
-    const toggleCritic = $('#toggleCritic')
 
     makeBold.click(() => {
       utils.wrapTextWith(this.editor, this.editor, '**')
@@ -317,21 +316,19 @@ export default class Editor {
       utils.insertText(this.editor, '> []')
     })
 
-    if (toggleCritic.length) {
-      this.criticToggle = toggleCritic
-      this.updateCriticToggle()
-      toggleCritic.click(() => {
-        this.setCriticHidden(!this.criticHidden)
-        this.editor.focus()
-      })
-    }
-
     uploadImage.bind('change', function (e) {
       const files = e.target.files || e.dataTransfer.files
       e.dataTransfer = {}
       e.dataTransfer.files = files
       inlineAttach.onDrop(e)
     })
+
+    // Toolbar toggle controls (right group)
+    this.statusTheme = this.toolBar.find('.ui-theme-toggle').parent()
+    this.statusSpellcheck = this.toolBar.find('.ui-spellcheck-toggle').parent()
+    this.setTheme()
+    this.setSpellcheck()
+    this.setCriticToggle()
   }
 
   addStatusBar () {
@@ -352,8 +349,6 @@ export default class Editor {
 
     this.setIndent()
     this.setKeymap()
-    this.setTheme()
-    this.setSpellcheck()
     this.setPreferences()
   }
 
@@ -686,6 +681,18 @@ export default class Editor {
       return false
     }
     return cookieValue === true || cookieValue === 'true'
+  }
+
+  setCriticToggle () {
+    const toggle = this.toolBar.find('.ui-critic-toggle')
+    if (toggle.length) {
+      this.criticToggle = toggle
+      this.updateCriticToggle()
+      toggle.click(() => {
+        this.setCriticHidden(!this.criticHidden)
+        this.editor.focus()
+      })
+    }
   }
 
   setCriticHidden (hidden) {
