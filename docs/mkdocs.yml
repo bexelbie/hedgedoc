@@ -39,6 +39,7 @@ nav:
   - Configuration: configuration.md
   - References:
       - 'HedgeDoc Flavored Markdown': references/hfm.md
+      - 'CriticMarkup Comments': references/criticmarkup-comments.md
       - 'Slide Options': references/slide-options.md
       - 'URL Scheme': references/url-scheme.md
       - 'YAML Metadata': references/yaml-metadata.md

@@ -545,7 +545,7 @@ export function finishView (view) {
   // render title
   document.title = renderTitle(view)
 
-  // CriticMarkup comment popovers
+  // CriticMarkup comment popovers (always created for both-mode fallback)
   view.find('.critic-comment').each(function () {
     const $el = $(this)
     // Only add popover once (avoid duplicates on re-render)
@@ -566,6 +566,119 @@ export function finishView (view) {
       }
     })
   })
+
+  // Phase 2: Margin side-bubbles in view mode
+  updateCriticMarginBubbles(view)
+}
+
+// Margin side-bubbles: create/update positioned bubbles in a right margin column
+export function updateCriticMarginBubbles (view) {
+  const $viewArea = $('.ui-view-area')
+  const $doc = $viewArea.find('#doc')
+  const isViewMode = !$viewArea.hasClass('col-lg-6')
+  const isWide = window.innerWidth >= 993
+
+  // Only show margin bubbles in view mode at wide viewport
+  if (!isViewMode || !isWide) {
+    $doc.find('.critic-margin').remove()
+    return
+  }
+
+  // Find or create the margin container as a child of #doc (inside its right padding area)
+  let $margin = $doc.find('.critic-margin')
+  if ($margin.length === 0) {
+    $margin = $('<div class="critic-margin"></div>')
+    $doc.append($margin)
+  }
+
+  // Clear and rebuild (idempotent)
+  $margin.empty()
+
+  const docEl = $doc[0]
+  if (!docEl) return
+
+  const docRect = docEl.getBoundingClientRect()
+  const comments = view.find('.critic-comment').toArray()
+  if (comments.length === 0) return
+
+  let lastBottom = 0
+  let consecutivePushes = 0
+  const BUBBLE_GAP = 4
+  const MAX_CONSECUTIVE_PUSHES = 5
+  const collapsedBubbles = []
+  let collapseStartY = 0
+
+  function flushCollapsed () {
+    if (collapsedBubbles.length === 0) return
+    const $more = $('<div class="critic-margin-more"></div>')
+    $more.text('+' + collapsedBubbles.length + ' more comment' + (collapsedBubbles.length > 1 ? 's' : ''))
+    $more.css('top', collapseStartY + 'px')
+
+    const $overflow = $('<div class="critic-margin-overflow" style="display:none;"></div>')
+    collapsedBubbles.forEach(function (b) {
+      $overflow.append(b)
+    })
+
+    $more.on('click', function () {
+      $more.toggleClass('expanded')
+      if ($more.hasClass('expanded')) {
+        $overflow.show()
+        $more.text('Hide comments')
+      } else {
+        $overflow.hide()
+        $more.text('+' + collapsedBubbles.length + ' more comment' + (collapsedBubbles.length > 1 ? 's' : ''))
+      }
+    })
+
+    $margin.append($more)
+    $margin.append($overflow)
+    collapsedBubbles.length = 0
+  }
+
+  for (let i = 0; i < comments.length; i++) {
+    const el = comments[i]
+    const commentText = $(el).attr('data-comment') || ''
+    if (!commentText) continue
+
+    const elRect = el.getBoundingClientRect()
+    let naturalY = elRect.top - docRect.top
+    let finalY = naturalY
+
+    // Stacking: prevent overlap
+    if (finalY < lastBottom + BUBBLE_GAP) {
+      finalY = lastBottom + BUBBLE_GAP
+      consecutivePushes++
+    } else {
+      // This bubble fits naturally — flush any collapsed backlog
+      flushCollapsed()
+      consecutivePushes = 0
+    }
+
+    // If too many consecutive pushes, collapse into "+N more"
+    if (consecutivePushes > MAX_CONSECUTIVE_PUSHES) {
+      const $bubble = $('<div class="critic-margin-bubble"></div>')
+      $bubble.text(commentText)
+      $bubble.css('top', finalY + 'px')
+      if (collapsedBubbles.length === 0) {
+        collapseStartY = finalY
+      }
+      collapsedBubbles.push($bubble)
+      // Estimate bubble height for stacking
+      lastBottom = finalY + 40
+      continue
+    }
+
+    const $bubble = $('<div class="critic-margin-bubble"></div>')
+    $bubble.text(commentText)
+    $bubble.css('top', finalY + 'px')
+    $margin.append($bubble)
+
+    // Estimate bubble height for stacking (will be refined after append)
+    lastBottom = finalY + $bubble.outerHeight()
+  }
+
+  // Flush any remaining collapsed bubbles
+  flushCollapsed()
 }
 
 // only static transform should be here

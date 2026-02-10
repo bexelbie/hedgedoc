@@ -57,6 +57,7 @@ import {
   renderTitle,
   scrollToHash,
   smoothHashScroll,
+  updateCriticMarginBubbles,
   updateLastChange,
   updateLastChangeUser,
   updateOwner
@@ -706,12 +707,21 @@ $(document).ready(function () {
   })
 })
 // when page resize
+let criticMarginResizeTimer = null
 $(window).resize(function () {
   checkLayout()
   checkEditorStyle()
   checkTocStyle()
   checkCursorMenu()
   windowResize()
+  // Debounced margin-bubble reposition
+  clearTimeout(criticMarginResizeTimer)
+  criticMarginResizeTimer = setTimeout(function () {
+    const $markdown = $('.markdown-body')
+    if ($markdown.length) {
+      updateCriticMarginBubbles($markdown)
+    }
+  }, 150)
 })
 // when page unload
 $(window).on('unload', function () {

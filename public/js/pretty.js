@@ -61,6 +61,7 @@ removeDOMEvents(markdown)
 finishView(markdown)
 // Strip CriticMarkup comments from published view
 markdown.find('.critic-comment').remove()
+markdown.find('.critic-margin').remove()
 autoLinkify(markdown)
 deduplicatedHeaderId(markdown)
 renderTOC(markdown)

@@ -534,3 +534,113 @@ body.night .critic-comment .critic-comment-popover::before {
 body.night .critic-comment .critic-comment-popover::after {
   border-bottom-color: #2b2314;
 }
+
+/* ======================================
+   CriticMarkup Margin Side-Bubbles (Phase 2)
+   ====================================== */
+
+/* View-mode layout: reserve right margin for comment bubbles */
+@media (min-width: 993px) {
+  .ui-view-area:not([class*="col-lg-6"]) #doc.markdown-body {
+    position: relative;
+    padding-right: 270px;
+  }
+
+  /* Hide inline popovers in view mode — margin bubbles replace them */
+  .ui-view-area:not([class*="col-lg-6"]) .critic-comment .critic-comment-popover {
+    display: none !important;
+  }
+}
+
+/* Margin container — sits inside #doc's right padding area */
+.critic-margin {
+  display: none;
+  position: absolute;
+  top: 0;
+  right: 15px;
+  width: 210px;
+  min-height: 100%;
+  pointer-events: none;
+}
+
+@media (min-width: 993px) {
+  .ui-view-area:not([class*="col-lg-6"]) .critic-margin {
+    display: block;
+    pointer-events: auto;
+  }
+}
+
+/* Individual margin bubble */
+.critic-margin-bubble {
+  position: absolute;
+  width: 195px;
+  padding: 8px 12px;
+  background: #fff;
+  border: 1px solid #d0a64b;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  color: #333;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  cursor: default;
+}
+
+/* "+N more" collapse pill */
+.critic-margin-more {
+  position: absolute;
+  width: 195px;
+  padding: 4px 12px;
+  background: #fff5d6;
+  border: 1px solid #d0a64b;
+  border-radius: 12px;
+  color: #c08b1d;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.critic-margin-more:hover {
+  background: #ffecb3;
+}
+
+/* When expanded, show the hidden overflow bubbles */
+.critic-margin-more.expanded + .critic-margin-overflow {
+  display: block !important;
+}
+
+/* Hide margin when comments are toggled off */
+.critic-comments-hidden .critic-margin {
+  display: none !important;
+}
+
+/* Night mode for margin bubbles */
+body.night .critic-margin-bubble {
+  background: #2b2314;
+  border-color: #8f6b28;
+  color: #d4c4a0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.night .critic-margin-more {
+  background: #2b2314;
+  border-color: #8f6b28;
+  color: #e2c089;
+}
+
+body.night .critic-margin-more:hover {
+  background: #3a3018;
+}
+
+/* Print: hide margin bubbles */
+@media print {
+  .critic-margin {
+    display: none !important;
+  }
+  .ui-view-area #doc.markdown-body {
+    padding-right: 0 !important;
+  }
+}

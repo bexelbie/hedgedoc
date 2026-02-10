@@ -53,6 +53,21 @@ HedgeDoc can integrate with
 
 More info about that can be found in the configuration docs above.
 
+## CriticMarkup Comments
+
+This fork adds support for **CriticMarkup comments** (`{>> comment text <<}`),
+giving collaborators a way to leave inline annotations on any note.
+
+- **Edit mode** — comments are syntax-highlighted and can be collapsed or expanded with a toolbar button.
+- **View mode on wide screens** (≥ 993 px) — comments appear as margin side bubbles next to the content, Google Docs-style.
+- **View mode on narrow screens / Both mode** — comments display as clickable inline pills with popovers.
+- **Published view** — comments are stripped automatically so readers see a clean document.
+- A **"Hide/Show comments"** toggle in the Table of Contents menu controls all comment UI.
+
+See the [CriticMarkup Comments documentation][criticmarkup-docs] for details.
+
+[criticmarkup-docs]: https://docs.hedgedoc.org/references/criticmarkup-comments/
+
 ## Browser support
 
 To use HedgeDoc, your browser should match or exceed these versions:
