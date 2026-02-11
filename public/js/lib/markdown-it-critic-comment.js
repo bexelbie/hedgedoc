@@ -20,7 +20,7 @@ function escapeAttr (str) {
  * @returns {boolean}
  */
 function criticCommentRule (state, silent) {
-  var start = state.pos
+  const start = state.pos
 
   // Quick check: must start with '{'
   if (state.src.charCodeAt(start) !== 0x7B /* { */) return false
@@ -29,17 +29,17 @@ function criticCommentRule (state, silent) {
   if (state.src.slice(start, start + 3) !== '{>>') return false
 
   // Search for closing marker '<<}'
-  var closeIdx = state.src.indexOf('<<}', start + 3)
+  const closeIdx = state.src.indexOf('<<}', start + 3)
   if (closeIdx === -1) return false
 
   // Validation pass — just confirm the match exists
   if (silent) return true
 
   // Extract and trim comment text
-  var content = state.src.slice(start + 3, closeIdx).trim()
+  const content = state.src.slice(start + 3, closeIdx).trim()
 
   // Create token
-  var token = state.push('critic_comment', '', 0)
+  const token = state.push('critic_comment', '', 0)
   token.content = content
 
   // Advance past the closing '<<}'
@@ -58,7 +58,7 @@ module.exports = function criticCommentPlugin (md) {
   md.inline.ruler.push('critic_comment', criticCommentRule)
 
   md.renderer.rules.critic_comment = function (tokens, idx) {
-    var content = escapeAttr(tokens[idx].content)
+    const content = escapeAttr(tokens[idx].content)
     return '<span class="critic-comment" data-comment="' + content + '"><i class="fa fa-comment"></i></span>'
   }
 }

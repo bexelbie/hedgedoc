@@ -799,7 +799,6 @@ export default class Editor {
       })
       this.criticMarkers.push({ marker, widget })
     }
-
   }
 
   clearCriticMarkers () {

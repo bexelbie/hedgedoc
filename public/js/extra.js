@@ -641,7 +641,7 @@ export function updateCriticMarginBubbles (view) {
     if (!commentText) continue
 
     const elRect = el.getBoundingClientRect()
-    let naturalY = elRect.top - docRect.top
+    const naturalY = elRect.top - docRect.top
     let finalY = naturalY
 
     // Stacking: prevent overlap
