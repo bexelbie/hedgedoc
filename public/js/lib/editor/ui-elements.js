@@ -12,7 +12,8 @@ export const getUIElements = () => ({
     publish: $('.ui-publish'),
     extra: {
       revision: $('.ui-extra-revision'),
-      slide: $('.ui-extra-slide')
+      slide: $('.ui-extra-slide'),
+      marpPreview: $('.ui-marp-preview')
     },
     download: {
       markdown: $('.ui-download-markdown'),

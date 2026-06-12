@@ -1228,6 +1228,24 @@ ui.toolbar.publish.attr('href', noteurl + '/publish')
 // extra
 // slide
 ui.toolbar.extra.slide.attr('href', noteurl + '/slide')
+ui.toolbar.extra.marpPreview.click(function (e) {
+  e.preventDefault()
+  e.stopPropagation()
+
+  const content = editor.getValue().slice(0, 500)
+  const hasMarpFrontmatter = /^---[\s\S]*?marp:\s*true/m.test(content)
+  const pathSegments = window.location.pathname.split('/').filter(Boolean)
+  const noteId = pathSegments[pathSegments.length - 1] || ''
+  const metaURL = document.querySelector('meta[name="marp-server-url"]')
+  const marpServerURL = (metaURL && metaURL.getAttribute('content')) || window.marpServerURL || 'http://localhost:8080'
+
+  if (hasMarpFrontmatter) {
+    window.open(marpServerURL + '/watch/' + noteId, '_blank')
+    return
+  }
+
+  showCopyToast('This note doesn\'t have \'marp: true\' in its frontmatter. Add it to enable Marp preview.', true)
+})
 // download
 // markdown
 ui.toolbar.download.markdown.click(function (e) {
