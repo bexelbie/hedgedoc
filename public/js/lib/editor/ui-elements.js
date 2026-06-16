@@ -13,7 +13,8 @@ export const getUIElements = () => ({
     extra: {
       revision: $('.ui-extra-revision'),
       slide: $('.ui-extra-slide'),
-      marpPreview: $('.ui-marp-preview')
+      marpPreview: $('.ui-marp-preview'),
+      marpDownload: $('.ui-marp-download')
     },
     download: {
       markdown: $('.ui-download-markdown'),
